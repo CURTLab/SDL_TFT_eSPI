@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(aoe_tft LANGUAGES CXX)
+project(TFT_eSPI_Tests LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,7 +15,7 @@ include_directories("TFT_eSPI")
 add_subdirectory(arduino)
 add_subdirectory(TFT_eSPI)
 
-add_executable(aoe_tft main.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(
     ${PROJECT_NAME}
@@ -27,5 +27,5 @@ target_link_libraries(
         SDL2::SDL2main
 )
 
-install(TARGETS aoe_tft
+install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
