@@ -1133,132 +1133,132 @@ int16_t TFT_eSPI::drawFloat(float floatNumber, uint8_t decimal, int32_t x, int32
 // Without font number, uses font set by setTextFont()
 int16_t TFT_eSPI::drawString(const String& string, int32_t poX, int32_t poY)
 {
-  int16_t len = string.length() + 2;
-  char *buffer = new char[len];
-  string.toCharArray(buffer, len);
-  auto ret = drawString(buffer, poX, poY, textfont);
-  delete [] buffer;
-  return ret;
+	int16_t len = string.length() + 2;
+	char *buffer = new char[len];
+	string.toCharArray(buffer, len);
+	auto ret = drawString(buffer, poX, poY, textfont);
+	delete [] buffer;
+	return ret;
 }
 // With font number
 int16_t TFT_eSPI::drawString(const String& string, int32_t poX, int32_t poY, uint8_t font)
 {
-  int16_t len = string.length() + 2;
-  char *buffer = new char[len];
-  string.toCharArray(buffer, len);
-  auto ret = drawString(buffer, poX, poY, font);
-  delete [] buffer;
-  return ret;
+	int16_t len = string.length() + 2;
+	char *buffer = new char[len];
+	string.toCharArray(buffer, len);
+	auto ret = drawString(buffer, poX, poY, font);
+	delete [] buffer;
+	return ret;
 }
 
 // Without font number, uses font set by setTextFont()
 int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY)
 {
-  return drawString(string, poX, poY, textfont);
+	return drawString(string, poX, poY, textfont);
 }
 
 // With font number. Note: font number is over-ridden if a smooth font is loaded
 int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY, uint8_t font)
 {
-  int16_t sumX = 0;
-  uint8_t padding = 1, baseline = 0;
-  uint16_t cwidth = textWidth(string, font); // Find the pixel width of the string in the font
-  uint16_t cheight = 8 * textsize;
+	int16_t sumX = 0;
+	uint8_t padding = 1, baseline = 0;
+	uint16_t cwidth = textWidth(string, font); // Find the pixel width of the string in the font
+	uint16_t cheight = 8 * textsize;
 
 #ifdef LOAD_GFXFF
-  #ifdef SMOOTH_FONT
-	 bool freeFont = (font == 1 && gfxFont && !fontLoaded);
-  #else
-	 bool freeFont = (font == 1 && gfxFont);
-  #endif
-
-  if (freeFont) {
-	 cheight = glyph_ab * textsize;
-	 poY += cheight; // Adjust for baseline datum of free fonts
-	 baseline = cheight;
-	 padding =101; // Different padding method used for Free Fonts
-
-	 // We need to make an adjustment for the bottom of the string (eg 'y' character)
-	 if ((textdatum == BL_DATUM) || (textdatum == BC_DATUM) || (textdatum == BR_DATUM)) {
-		cheight += glyph_bb * textsize;
-	 }
-  }
-#endif
-
-
-  // If it is not font 1 (GLCD or free font) get the baseline and pixel height of the font
 #ifdef SMOOTH_FONT
-  if(fontLoaded) {
-	 baseline = gFont.maxAscent;
-	 cheight  = fontHeight();
-  }
-  else
+	bool freeFont = (font == 1 && gfxFont && !fontLoaded);
+#else
+	bool freeFont = (font == 1 && gfxFont);
 #endif
-  if (font!=1) {
-	 baseline = pgm_read_byte( &fontdata[font].baseline ) * textsize;
-	 cheight = fontHeight(font);
-  }
 
-  if (textdatum || padX) {
+	if (freeFont) {
+		cheight = glyph_ab * textsize;
+		poY += cheight; // Adjust for baseline datum of free fonts
+		baseline = cheight;
+		padding =101; // Different padding method used for Free Fonts
 
-	 switch(textdatum) {
+		// We need to make an adjustment for the bottom of the string (eg 'y' character)
+		if ((textdatum == BL_DATUM) || (textdatum == BC_DATUM) || (textdatum == BR_DATUM)) {
+			cheight += glyph_bb * textsize;
+		}
+	}
+#endif
+
+
+	// If it is not font 1 (GLCD or free font) get the baseline and pixel height of the font
+#ifdef SMOOTH_FONT
+	if(fontLoaded) {
+		baseline = gFont.maxAscent;
+		cheight  = fontHeight();
+	}
+	else
+#endif
+		if (font!=1) {
+			baseline = pgm_read_byte( &fontdata[font].baseline ) * textsize;
+			cheight = fontHeight(font);
+		}
+
+	if (textdatum || padX) {
+
+		switch(textdatum) {
 		case TC_DATUM:
-		  poX -= cwidth/2;
-		  padding += 1;
-		  break;
+			poX -= cwidth/2;
+			padding += 1;
+			break;
 		case TR_DATUM:
-		  poX -= cwidth;
-		  padding += 2;
-		  break;
+			poX -= cwidth;
+			padding += 2;
+			break;
 		case ML_DATUM:
-		  poY -= cheight/2;
-		  //padding += 0;
-		  break;
+			poY -= cheight/2;
+			//padding += 0;
+			break;
 		case MC_DATUM:
-		  poX -= cwidth/2;
-		  poY -= cheight/2;
-		  padding += 1;
-		  break;
+			poX -= cwidth/2;
+			poY -= cheight/2;
+			padding += 1;
+			break;
 		case MR_DATUM:
-		  poX -= cwidth;
-		  poY -= cheight/2;
-		  padding += 2;
-		  break;
+			poX -= cwidth;
+			poY -= cheight/2;
+			padding += 2;
+			break;
 		case BL_DATUM:
-		  poY -= cheight;
-		  //padding += 0;
-		  break;
+			poY -= cheight;
+			//padding += 0;
+			break;
 		case BC_DATUM:
-		  poX -= cwidth/2;
-		  poY -= cheight;
-		  padding += 1;
-		  break;
+			poX -= cwidth/2;
+			poY -= cheight;
+			padding += 1;
+			break;
 		case BR_DATUM:
-		  poX -= cwidth;
-		  poY -= cheight;
-		  padding += 2;
-		  break;
+			poX -= cwidth;
+			poY -= cheight;
+			padding += 2;
+			break;
 		case L_BASELINE:
-		  poY -= baseline;
-		  //padding += 0;
-		  break;
+			poY -= baseline;
+			//padding += 0;
+			break;
 		case C_BASELINE:
-		  poX -= cwidth/2;
-		  poY -= baseline;
-		  padding += 1;
-		  break;
+			poX -= cwidth/2;
+			poY -= baseline;
+			padding += 1;
+			break;
 		case R_BASELINE:
-		  poX -= cwidth;
-		  poY -= baseline;
-		  padding += 2;
-		  break;
-	 }
-  }
+			poX -= cwidth;
+			poY -= baseline;
+			padding += 2;
+			break;
+		}
+	}
 
 
-  int8_t xo = 0;
+	int8_t xo = 0;
 #ifdef LOAD_GFXFF
-  if (freeFont && (textcolor!=textbgcolor)) {
+	if (freeFont && (textcolor!=textbgcolor)) {
 		cheight = (glyph_ab + glyph_bb) * textsize;
 		// Get the offset for the first character only to allow for negative offsets
 		uint16_t c2 = 0;
@@ -1268,113 +1268,113 @@ int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY, uint8
 		while (n < len && c2 == 0) c2 = decodeUTF8((uint8_t*)string, &n, len - n);
 
 		if((c2 >= pgm_read_word(&gfxFont->first)) && (c2 <= pgm_read_word(&gfxFont->last) )) {
-		  c2 -= pgm_read_word(&gfxFont->first);
-		  GFXglyph *glyph = &(((GFXglyph *)pgm_read_dword(&gfxFont->glyph))[c2]);
-		  xo = pgm_read_byte(&glyph->xOffset) * textsize;
-		  // Adjust for negative xOffset
-		  if (xo > 0) xo = 0;
-		  else cwidth -= xo;
-		  // Add 1 pixel of padding all round
-		  //cheight +=2;
-		  //fillRect(poX+xo-1, poY - 1 - glyph_ab * textsize, cwidth+2, cheight, textbgcolor);
-		  fillRect(poX+xo, poY - glyph_ab * textsize, cwidth, cheight, textbgcolor);
+			c2 -= pgm_read_word(&gfxFont->first);
+			GFXglyph *glyph = &(((GFXglyph *)pgm_read_dword(&gfxFont->glyph))[c2]);
+			xo = pgm_read_byte(&glyph->xOffset) * textsize;
+			// Adjust for negative xOffset
+			if (xo > 0) xo = 0;
+			else cwidth -= xo;
+			// Add 1 pixel of padding all round
+			//cheight +=2;
+			//fillRect(poX+xo-1, poY - 1 - glyph_ab * textsize, cwidth+2, cheight, textbgcolor);
+			fillRect(poX+xo, poY - glyph_ab * textsize, cwidth, cheight, textbgcolor);
 		}
 		padding -=100;
-	 }
+	}
 #endif
 
-  uint16_t len = strlen(string);
-  uint16_t n = 0;
+	uint16_t len = strlen(string);
+	uint16_t n = 0;
 
 #ifdef SMOOTH_FONT
-  if(fontLoaded) {
-	 setCursor(poX, poY);
+	if(fontLoaded) {
+		setCursor(poX, poY);
 
-	 bool fillbg = _fillbg;
-	 // If padding is requested then fill the text background
-	 if (padX && !_fillbg) _fillbg = true;
+		bool fillbg = _fillbg;
+		// If padding is requested then fill the text background
+		if (padX && !_fillbg) _fillbg = true;
 
-	 while (n < len) {
-		uint16_t uniCode = decodeUTF8((uint8_t*)string, &n, len - n);
-		drawGlyph(uniCode);
-	 }
-	 _fillbg = fillbg; // restore state
-	 sumX += cwidth;
-	 //fontFile.close();
-  }
-  else
+		while (n < len) {
+			uint16_t uniCode = decodeUTF8((uint8_t*)string, &n, len - n);
+			drawGlyph(uniCode);
+		}
+		_fillbg = fillbg; // restore state
+		sumX += cwidth;
+		//fontFile.close();
+	}
+	else
 #endif
-  {
-	 while (n < len) {
-		uint16_t uniCode = decodeUTF8((uint8_t*)string, &n, len - n);
-		sumX += drawChar(uniCode, poX+sumX, poY, font);
-	 }
-  }
+	{
+		while (n < len) {
+			uint16_t uniCode = decodeUTF8((uint8_t*)string, &n, len - n);
+			sumX += drawChar(uniCode, poX+sumX, poY, font);
+		}
+	}
 
-//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv DEBUG vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-// Switch on debugging for the padding areas
-//#define PADDING_DEBUG
+	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv DEBUG vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+	// Switch on debugging for the padding areas
+	//#define PADDING_DEBUG
 
 #ifndef PADDING_DEBUG
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ DEBUG ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ DEBUG ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  if((padX>cwidth) && (textcolor!=textbgcolor)) {
-	 int16_t padXc = poX+cwidth+xo;
+	if((padX>cwidth) && (textcolor!=textbgcolor)) {
+		int16_t padXc = poX+cwidth+xo;
 #ifdef LOAD_GFXFF
-	 if (freeFont) {
-		poX +=xo; // Adjust for negative offset start character
-		poY -= glyph_ab * textsize;
-		sumX += poX;
-	 }
+		if (freeFont) {
+			poX +=xo; // Adjust for negative offset start character
+			poY -= glyph_ab * textsize;
+			sumX += poX;
+		}
 #endif
-	 switch(padding) {
+		switch(padding) {
 		case 1:
-		  fillRect(padXc,poY,padX-cwidth,cheight, textbgcolor);
-		  break;
+			fillRect(padXc,poY,padX-cwidth,cheight, textbgcolor);
+			break;
 		case 2:
-		  fillRect(padXc,poY,(padX-cwidth)>>1,cheight, textbgcolor);
-		  padXc = poX - ((padX-cwidth)>>1);
-		  fillRect(padXc,poY,(padX-cwidth)>>1,cheight, textbgcolor);
-		  break;
+			fillRect(padXc,poY,(padX-cwidth)>>1,cheight, textbgcolor);
+			padXc = poX - ((padX-cwidth)>>1);
+			fillRect(padXc,poY,(padX-cwidth)>>1,cheight, textbgcolor);
+			break;
 		case 3:
-		  if (padXc>padX) padXc = padX;
-		  fillRect(poX + cwidth - padXc,poY,padXc-cwidth,cheight, textbgcolor);
-		  break;
-	 }
-  }
+			if (padXc>padX) padXc = padX;
+			fillRect(poX + cwidth - padXc,poY,padXc-cwidth,cheight, textbgcolor);
+			break;
+		}
+	}
 
 
 #else
 
-//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv DEBUG vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-// This is debug code to show text (green box) and blanked (white box) areas
-// It shows that the padding areas are being correctly sized and positioned
+	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv DEBUG vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+	// This is debug code to show text (green box) and blanked (white box) areas
+	// It shows that the padding areas are being correctly sized and positioned
 
-  if((padX>sumX) && (textcolor!=textbgcolor)) {
-	 int16_t padXc = poX+sumX; // Maximum left side padding
+	if((padX>sumX) && (textcolor!=textbgcolor)) {
+		int16_t padXc = poX+sumX; // Maximum left side padding
 #ifdef LOAD_GFXFF
-	 if ((font == 1) && (gfxFont)) poY -= glyph_ab;
+		if ((font == 1) && (gfxFont)) poY -= glyph_ab;
 #endif
-	 drawRect(poX,poY,sumX,cheight, TFT_GREEN);
-	 switch(padding) {
+		drawRect(poX,poY,sumX,cheight, TFT_GREEN);
+		switch(padding) {
 		case 1:
-		  drawRect(padXc,poY,padX-sumX,cheight, TFT_WHITE);
-		  break;
+			drawRect(padXc,poY,padX-sumX,cheight, TFT_WHITE);
+			break;
 		case 2:
-		  drawRect(padXc,poY,(padX-sumX)>>1, cheight, TFT_WHITE);
-		  padXc = (padX-sumX)>>1;
-		  drawRect(poX - padXc,poY,(padX-sumX)>>1,cheight, TFT_WHITE);
-		  break;
+			drawRect(padXc,poY,(padX-sumX)>>1, cheight, TFT_WHITE);
+			padXc = (padX-sumX)>>1;
+			drawRect(poX - padXc,poY,(padX-sumX)>>1,cheight, TFT_WHITE);
+			break;
 		case 3:
-		  if (padXc>padX) padXc = padX;
-		  drawRect(poX + sumX - padXc,poY,padXc-sumX,cheight, TFT_WHITE);
-		  break;
-	 }
-  }
+			if (padXc>padX) padXc = padX;
+			drawRect(poX + sumX - padXc,poY,padXc-sumX,cheight, TFT_WHITE);
+			break;
+		}
+	}
 #endif
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ DEBUG ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ DEBUG ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-return sumX;
+	return sumX;
 }
 
 
@@ -1384,22 +1384,22 @@ return sumX;
 ***************************************************************************************/
 int16_t TFT_eSPI::drawCentreString(const String& string, int32_t dX, int32_t poY, uint8_t font)
 {
-  int16_t len = string.length() + 2;
-  char *buffer = new char[len];
-  string.toCharArray(buffer, len);
-  auto ret = drawCentreString(buffer, dX, poY, font);
-  delete [] buffer;
-  return ret;
+	int16_t len = string.length() + 2;
+	char *buffer = new char[len];
+	string.toCharArray(buffer, len);
+	auto ret = drawCentreString(buffer, dX, poY, font);
+	delete [] buffer;
+	return ret;
 }
 
 int16_t TFT_eSPI::drawCentreString(const char *string, int32_t dX, int32_t poY, uint8_t font)
 {
-  uint8_t tempdatum = textdatum;
-  int32_t sumX = 0;
-  textdatum = TC_DATUM;
-  sumX = drawString(string, dX, poY, font);
-  textdatum = tempdatum;
-  return sumX;
+	uint8_t tempdatum = textdatum;
+	int32_t sumX = 0;
+	textdatum = TC_DATUM;
+	sumX = drawString(string, dX, poY, font);
+	textdatum = tempdatum;
+	return sumX;
 }
 
 
@@ -1409,22 +1409,22 @@ int16_t TFT_eSPI::drawCentreString(const char *string, int32_t dX, int32_t poY, 
 ***************************************************************************************/
 int16_t TFT_eSPI::drawRightString(const String& string, int32_t dX, int32_t poY, uint8_t font)
 {
-  int16_t len = string.length() + 2;
-  char *buffer = new char[len];
-  string.toCharArray(buffer, len);
-  auto ret = drawRightString(buffer, dX, poY, font);
-  delete [] buffer;
-  return ret;
+	int16_t len = string.length() + 2;
+	char *buffer = new char[len];
+	string.toCharArray(buffer, len);
+	auto ret = drawRightString(buffer, dX, poY, font);
+	delete [] buffer;
+	return ret;
 }
 
 int16_t TFT_eSPI::drawRightString(const char *string, int32_t dX, int32_t poY, uint8_t font)
 {
-  uint8_t tempdatum = textdatum;
-  int16_t sumX = 0;
-  textdatum = TR_DATUM;
-  sumX = drawString(string, dX, poY, font);
-  textdatum = tempdatum;
-  return sumX;
+	uint8_t tempdatum = textdatum;
+	int16_t sumX = 0;
+	textdatum = TR_DATUM;
+	sumX = drawString(string, dX, poY, font);
+	textdatum = tempdatum;
+	return sumX;
 }
 
 void TFT_eSPI::setCursor(int16_t x, int16_t y)
@@ -1509,26 +1509,94 @@ void TFT_eSPI::setTextFont(uint8_t font)
 
 int16_t TFT_eSPI::textWidth(const char *string, uint8_t font)
 {
-	assert(false && "textWidth not implemented yet");
-	return 0;
+	int32_t str_width = 0;
+	uint16_t uniCode  = 0;
+
+#ifdef SMOOTH_FONT
+	if(fontLoaded) {
+		while (*string) {
+			uniCode = decodeUTF8(*string++);
+			if (uniCode) {
+				if (uniCode == 0x20) str_width += gFont.spaceWidth;
+				else {
+					uint16_t gNum = 0;
+					bool found = getUnicodeIndex(uniCode, &gNum);
+					if (found) {
+						if(str_width == 0 && gdX[gNum] < 0) str_width -= gdX[gNum];
+						if (*string || isDigits) str_width += gxAdvance[gNum];
+						else str_width += (gdX[gNum] + gWidth[gNum]);
+					}
+					else str_width += gFont.spaceWidth + 1;
+				}
+			}
+		}
+		isDigits = false;
+		return str_width;
+	}
+#endif
+
+	if (font>1 && font<9) {
+		char *widthtable = (char *)pgm_read_dword( &(fontdata[font].widthtbl ) ) - 32; //subtract the 32 outside the loop
+
+		while (*string) {
+			uniCode = *(string++);
+			if (uniCode > 31 && uniCode < 128)
+				str_width += pgm_read_byte( widthtable + uniCode); // Normally we need to subtract 32 from uniCode
+			else str_width += pgm_read_byte( widthtable + 32); // Set illegal character = space width
+		}
+
+	}
+	else {
+
+#ifdef LOAD_GFXFF
+		if(gfxFont) { // New font
+			while (*string) {
+				uniCode = decodeUTF8(*string++);
+				if ((uniCode >= pgm_read_word(&gfxFont->first)) && (uniCode <= pgm_read_word(&gfxFont->last ))) {
+					uniCode -= pgm_read_word(&gfxFont->first);
+					GFXglyph *glyph  = &(((GFXglyph *)pgm_read_dword(&gfxFont->glyph))[uniCode]);
+					// If this is not the  last character or is a digit then use xAdvance
+					if (*string  || isDigits) str_width += pgm_read_byte(&glyph->xAdvance);
+					// Else use the offset plus width since this can be bigger than xAdvance
+					else str_width += ((int8_t)pgm_read_byte(&glyph->xOffset) + pgm_read_byte(&glyph->width));
+				}
+			}
+		}
+		else
+#endif
+		{
+#ifdef LOAD_GLCD
+			while (*string++) str_width += 6;
+#endif
+		}
+	}
+	isDigits = false;
+	return str_width * textsize;
 }
 
 int16_t TFT_eSPI::textWidth(const char *string)
 {
-	assert(false && "textWidth not implemented yet");
-	return 0;
+	return textWidth(string, textfont);
 }
 
 int16_t TFT_eSPI::textWidth(const String& string, uint8_t font)
 {
-	assert(false && "textWidth not implemented yet");
-	return 0;
+	int16_t len = string.length() + 2;
+	char *buffer = new char[len];
+	string.toCharArray(buffer, len);
+	auto ret = textWidth(buffer, font);
+	delete [] buffer;
+	return ret;
 }
 
 int16_t TFT_eSPI::textWidth(const String& string)
 {
-	assert(false && "textWidth not implemented yet");
-	return 0;
+	int16_t len = string.length() + 2;
+	char *buffer = new char[len];
+	string.toCharArray(buffer, len);
+	auto ret = textWidth(buffer, textfont);
+	delete [] buffer;
+	return ret;
 }
 
 int16_t TFT_eSPI::fontHeight(int16_t font)
@@ -1545,14 +1613,72 @@ int16_t TFT_eSPI::fontHeight()
 
 uint16_t TFT_eSPI::decodeUTF8(uint8_t *buf, uint16_t *index, uint16_t remaining)
 {
-	assert(false && "decodeUTF8 not implemented yet");
-	return 0;
+	uint16_t c = buf[(*index)++];
+	//Serial.print("Byte from string = 0x"); Serial.println(c, HEX);
+
+	if (!_utf8) return c;
+
+	// 7 bit Unicode
+	if ((c & 0x80) == 0x00) return c;
+
+	// 11 bit Unicode
+	if (((c & 0xE0) == 0xC0) && (remaining > 1))
+		return ((c & 0x1F)<<6) | (buf[(*index)++]&0x3F);
+
+	// 16 bit Unicode
+	if (((c & 0xF0) == 0xE0) && (remaining > 2)) {
+		c = ((c & 0x0F)<<12) | ((buf[(*index)++]&0x3F)<<6);
+		return  c | ((buf[(*index)++]&0x3F));
+	}
+
+	// 21 bit Unicode not supported so fall-back to extended ASCII
+	// if ((c & 0xF8) == 0xF0) return c;
+
+	return c; // fall-back to extended ASCII
 }
 
 uint16_t TFT_eSPI::decodeUTF8(uint8_t c)
 {
-	assert(false && "decodeUTF8 not implemented yet");
-	return 0;
+	if (!_utf8) return c;
+
+	// 7 bit Unicode Code Point
+	if ((c & 0x80) == 0x00) {
+		decoderState = 0;
+		return c;
+	}
+
+	if (decoderState == 0) {
+		// 11 bit Unicode Code Point
+		if ((c & 0xE0) == 0xC0) {
+			decoderBuffer = ((c & 0x1F)<<6);
+			decoderState = 1;
+			return 0;
+		}
+		// 16 bit Unicode Code Point
+		if ((c & 0xF0) == 0xE0) {
+			decoderBuffer = ((c & 0x0F)<<12);
+			decoderState = 2;
+			return 0;
+		}
+		// 21 bit Unicode  Code Point not supported so fall-back to extended ASCII
+		// if ((c & 0xF8) == 0xF0) return c;
+	}
+	else {
+		if (decoderState == 2) {
+			decoderBuffer |= ((c & 0x3F)<<6);
+			decoderState--;
+			return 0;
+		}
+		else {
+			decoderBuffer |= (c & 0x3F);
+			decoderState = 0;
+			return decoderBuffer;
+		}
+	}
+
+	decoderState = 0;
+
+	return c; // fall-back to extended ASCII
 }
 
 size_t TFT_eSPI::write(uint8_t)

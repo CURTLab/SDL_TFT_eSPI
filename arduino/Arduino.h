@@ -18,8 +18,9 @@
 
 #define log_i(__x__) std::cout << __x__ << std::endl;
 
-#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-#define pgm_read_word(addr) (*(const unsigned short *)(addr))
+#define pgm_read_byte(addr) (*(const uint8_t *)(addr))
+#define pgm_read_word(addr) (*(const uint16_t *)(addr))
+#define pgm_read_dword(addr) (*(const uint16_t *)(addr))
 
 class SerialClass : public Stream
 {
